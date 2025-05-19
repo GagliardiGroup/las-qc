@@ -7,7 +7,7 @@ name = "las-qc"
 description = "Molecular geometry library"
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = ["ab initio", "chemistry"]
+keywords = ["ab initio", "chemistry", "quantum computing"]
 license = { text = "Apache-2.0" }
 dependencies = [
     # "mhr", # Make this versioned 
