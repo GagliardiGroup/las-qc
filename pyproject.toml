@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "las-qc"
+description = "Molecular geometry library"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["ab initio", "chemistry"]
+license = { text = "Apache-2.0" }
+dependencies = [
+    # "mhr", # Make this versioned 
+    "qiskit >= 1.4, < 2", # We'll move to 2 eventually
+    "qiskit-nature", # Let this be determined by the version of qiskit
+    "numpy >= 1.21",
+]
+dynamic = ["version"]
+
+[project.urls]
+Source = "https://github.com/GagliardiGroup/las-qc"
+Issues = "https://github.com/GagliardiGroup/las-qc/issues"
+
+[project.optional-dependencies]
+dev = ["ruff", "esbonio"]
+
+[tool.setuptools]
+packages = ["las_qc"]
+
+[tool.setuptools_scm]
+# version_scheme = "release-branch-semver"
+
+# [tool.ruff.lint]
+# ignore = ["E741"]
+# extend-select = ["I"]
