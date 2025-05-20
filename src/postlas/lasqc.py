@@ -1,4 +1,4 @@
-#########################
+#######################
 # Define LASQC class
 # Set up and run a LASSCF calculation
 # Other methods as solvers for LASQC
@@ -8,7 +8,7 @@
 from pyscf import gto, scf, lib
 # mrh imports
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
-from mrh.my_pyscf.mcscf.lasci import h1e_for_cas
+from mrh.my_pyscf.mcscf.lasci import h1e_for_las
 
 from get_geom import get_geom
 
@@ -36,10 +36,10 @@ class LASQC:
         self.mf = mf
         self.las = las
 
-if name == '__main__':
+if __name__ == '__main__':
 
-    xyz = get_geom('scan', dist=args.dist)
-    mol = gto.M (atom = xyz, basis = 'sto-3g', output='h4_sto3g_{}.log'.format(args.dist),
+    xyz = get_geom('far')
+    mol = gto.M (atom = xyz, basis = 'sto-3g', output='h4_sto3g.log',
         symmetry=False, verbose=lib.logger.DEBUG)
-    lasqc_wfn = LASQC(mol)
+    lasqc_wfn = LASQC(mol, frag_orbs=(2,2), frag_elec=(2,2), frag_atom_list=((0,1),(2,3)), spin_sub=(1,1))
 
