@@ -10,14 +10,16 @@ from pyscf import gto, scf, lib, mcscf, ao2mo
 from pyscf.tools import fcidump
 # mrh imports
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
-from mrh.my_pyscf.mcscf.lasci import h1e_for_cas
+#from mrh.my_pyscf.mcscf.lasci import h1e_for_cas
 # Qiskit imports
-from qiskit.utils import QuantumInstance
-from qiskit.algorithms import NumPyEigensolver
-from qiskit import Aer
+#from qiskit.utils import QuantumInstance
+from qiskit_algorithms import NumPyEigensolver
+#from qiskit import Aer
+from qiskit_aer import AerSimulator
+from qiskit import transpile, assemble
 
-from get_geom import get_geom
-from get_hamiltonian import get_hamiltonian
+from postlas.get_geom import get_geom
+from postlas.get_hamiltonian import get_hamiltonian
 
 def test_hf():
     '''Test the PySCF RHF'''
@@ -107,7 +109,10 @@ def test_frag_np_eig():
         hamiltonian = get_hamiltonian(frag, las.nelecas_sub, las.ncas_sub, h1_frag, h2_frag)
 
         # Set the backend
-        quantum_instance = QuantumInstance(backend = Aer.get_backend('aer_simulator'), shots=1024)
+        backend = AerSimulator()
+        qc = transpile(qc, backend)
+        qobj = assemble(qc, shots=1024)
+        #quantum_instance = QuantumInstance(backend = Aer.get_backend('aer_simulator'), shots=1024)
 
         # Numpy solver to estimate error in QPE energy due to trotterization
         np_solver = NumPyEigensolver(k=1)
