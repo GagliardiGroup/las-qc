@@ -3,7 +3,6 @@ from qiskit_nature.second_q.hamiltonians import ElectronicEnergy
 from qiskit_nature.second_q.properties import ParticleNumber
 from qiskit_nature.second_q.problems import ElectronicStructureProblem
 from qiskit_nature.second_q.mappers import JordanWignerMapper, ParityMapper
-#from qiskit_nature.second_q.converters import QubitConverter
 
 
 def get_hamiltonian(frag, nelecas_sub, ncas_sub, h1, h2):
@@ -29,10 +28,7 @@ def get_hamiltonian(frag, nelecas_sub, ncas_sub, h1, h2):
 
     # Assuming an RHF reference for now, so h1_b, h2_ab, h2_bb are created using 
     # the corresponding spots from h1_frag and just the aa term from h2_frag
-    electronic_energy = ElectronicEnergy.from_raw_integrals(
-            # Using MO basis here for simplified conversion
-            h1, h2
-    )
+    electronic_energy = ElectronicEnergy.from_raw_integrals(h1, h2)
 
     # QK NOTE: under Python 3.6, pylint appears to be unable to properly identify this case of
     # nested abstract classes (cf. https://github.com/Qiskit/qiskit-nature/runs/3245395353).
@@ -46,8 +42,6 @@ def get_hamiltonian(frag, nelecas_sub, ncas_sub, h1, h2):
 
     # Choose fermion-to-qubit mapping
     qubit_converter = QubitConverter(mapper = JordanWignerMapper(), two_qubit_reduction=False)
-    # This just outputs a qubit op corresponding to a 2nd quantized op
-    #qubit_ops = [qubit_converter.convert(op) for op in second_q_ops]
     hamiltonian = JordanWignerMapper().map(electronic_energy.second_q_op())#qubit_ops[0]
     return hamiltonian
 
