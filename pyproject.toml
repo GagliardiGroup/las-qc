@@ -1,10 +1,10 @@
-[build-system]
+ebuild-system]
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "las-qc"
-description = "Molecular geometry library"
+description = "Quantum-Base Post-LAS Algorithms"
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["ab initio", "chemistry", "quantum computing"]
@@ -22,7 +22,7 @@ Source = "https://github.com/GagliardiGroup/las-qc"
 Issues = "https://github.com/GagliardiGroup/las-qc/issues"
 
 [project.optional-dependencies]
-dev = ["ruff", "esbonio"]
+dev = ["ruff", "esbonio", "pytest"]
 
 [tool.setuptools]
 packages = ["las_qc"]
