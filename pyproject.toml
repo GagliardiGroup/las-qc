@@ -1,4 +1,4 @@
-ebuild-system]
+[build-system]
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "las-qc"
 description = "Quantum-Base Post-LAS Algorithms"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 keywords = ["ab initio", "chemistry", "quantum computing"]
 license = { text = "Apache-2.0" }
 dependencies = [
@@ -23,6 +23,9 @@ Issues = "https://github.com/GagliardiGroup/las-qc/issues"
 
 [project.optional-dependencies]
 dev = ["ruff", "esbonio", "pytest"]
+
+[project.scripts]
+"las-qc" = "las_qc.__main__:main"
 
 [tool.setuptools]
 packages = ["las_qc"]
