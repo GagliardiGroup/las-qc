@@ -5,12 +5,11 @@
 #########################
 
 # PySCF imports
-from pyscf import gto, scf, lib
+
 # mrh imports
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
-from mrh.my_pyscf.mcscf.lasci import h1e_for_las
+from pyscf import scf
 
-from get_geom import get_geom
 
 # Define LASQC class
 class LASQC:
@@ -35,11 +34,4 @@ class LASQC:
 
         self.mf = mf
         self.las = las
-
-if __name__ == '__main__':
-
-    xyz = get_geom('far')
-    mol = gto.M (atom = xyz, basis = 'sto-3g', output='h4_sto3g.log',
-        symmetry=False, verbose=lib.logger.DEBUG)
-    lasqc_wfn = LASQC(mol, frag_orbs=(2,2), frag_elec=(2,2), frag_atom_list=((0,1),(2,3)), spin_sub=(1,1))
 
