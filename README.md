@@ -36,3 +36,11 @@ Clone this repository and perform an editable install with pip.
 git clone https://github.com/GagliardiGroup/las-qc.git
 pip install -e ./las-qc[dev]
 ```
+
+## Running
+
+The CLI hasn't been started, but for now you can run a sample calculation by installing LAS-QC and running
+
+```bash
+las-qc
+```
