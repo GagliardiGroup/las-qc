@@ -1,6 +1,6 @@
 #########################
 # LASUCC Solver Class
-# PySCF-style standalone wrapper for LAS-VQE
+# PySCF-way standalone wrapper for LAS-VQE
 #########################
 
 import numpy as np
