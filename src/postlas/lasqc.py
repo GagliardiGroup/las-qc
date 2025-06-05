@@ -43,3 +43,7 @@ if __name__ == '__main__':
         symmetry=False, verbose=lib.logger.DEBUG)
     lasqc_wfn = LASQC(mol, frag_orbs=(2,2), frag_elec=(2,2), frag_atom_list=((0,1),(2,3)), spin_sub=(1,1))
 
+    # Choose one post-LAS solver
+    solver = LASUSCC(lasqc.las)  # or LASUCC, LASQKSD
+    solver.kernel()
+
