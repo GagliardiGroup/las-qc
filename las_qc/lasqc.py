@@ -5,12 +5,11 @@
 #########################
 
 # PySCF imports
-from pyscf import gto, scf, lib
+
 # mrh imports
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
-from mrh.my_pyscf.mcscf.lasci import h1e_for_las
+from pyscf import scf
 
-from get_geom import get_geom
 
 # Define LASQC class
 class LASQC:
