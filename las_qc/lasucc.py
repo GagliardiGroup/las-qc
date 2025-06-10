@@ -46,7 +46,7 @@ class LASUCC:
 
         return init_state, hamiltonian
 
-    def get_hamiltonian(self):
+    def get_mapped_hamiltonian(self):
         h1, e_core = self.las.h1e_for_cas()
         h2 = lib.numpy_helper.unpack_tril (las.get_h2eff().reshape (nmo*ncas,ncas*(ncas+1)//2)).reshape(nmo, ncas, ncas, ncas)[ncore:nocc,:,:,:])
         hamiltonian = get_hamiltonian (None, self.nelecas, self.ncas, h1, h2)
