@@ -44,14 +44,16 @@ class LASUCC:
 
         init_state = #SV need to define a method for intializing LAS
 
+        return init_state, hamiltonian
+
+    def get_hamiltonian(self):
         h1, e_core = self.las.h1e_for_cas()
         h2 = lib.numpy_helper.unpack_tril (las.get_h2eff().reshape (nmo*ncas,ncas*(ncas+1)//2)).reshape(nmo, ncas, ncas, ncas)[ncore:nocc,:,:,:])
         hamiltonian = get_hamiltonian (None, self.nelecas, self.ncas, h1, h2)
+        return hamiltonian
 
-        return init_state, hamiltonian
-
-    def generate_anstaz(self, init_state):
-        return anstaz
+    def generate_ansatz(self, init_state):
+        return ansatz
 
     def kernel(self, statevectors=None, anstaz=None, estimator=None):
         print("[LASUCC] Running LAS-UCC with VQE...")
