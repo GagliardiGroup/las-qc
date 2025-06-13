@@ -20,7 +20,7 @@ class LASUCC(LASQC):
     
 
     def _custom_excitations(self, num_spin_orbitals, num_particles, num_sub, eps=0.0):
-        '''Give an option for full list or selected list of excitations for USCC'''
+        '''Give an option for full list or selected list of excitations for USCC; must be moved to custom_UCC file'''
         if eps==0.0:
             excitations = []
             norb = int(num_spin_orbitals / 2)
@@ -41,8 +41,8 @@ class LASUCC(LASQC):
         ansatz = custom_UCC(
             num_particles=(2, 2),
             num_spin_orbitals=n_qubits,
-            excitations=self._custom_excitations,
             initial_state=init_circ,
+            epsilon=0.0
             preserve_spin=False
         )
         return ansatz
