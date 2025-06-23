@@ -3,7 +3,7 @@ from qiskit_nature.second_q.hamiltonians import ElectronicEnergy
 from qiskit_nature.second_q.mappers import JordanWignerMapper
 
 
-def get_hamiltonian(frag, nelecas_sub, ncas_sub, h1, h2):
+def get_hamiltonian(frag, nelecas_sub, ncas_sub, h1, h2, mapper=JordanwignerMapper()):
     if frag is None:
         num_alpha = nelecas_sub[0]
         num_beta = nelecas_sub[1]
@@ -21,6 +21,6 @@ def get_hamiltonian(frag, nelecas_sub, ncas_sub, h1, h2):
     electronic_energy = ElectronicEnergy.from_raw_integrals(h1, h2)
 
     # Choose fermion-to-qubit mapping
-    hamiltonian = JordanWignerMapper().map(electronic_energy.second_q_op())#qubit_ops[0]
+    hamiltonian = mapper.map(electronic_energy.second_q_op())#qubit_ops[0]
     return hamiltonian
 
