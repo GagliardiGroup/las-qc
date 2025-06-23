@@ -41,6 +41,7 @@ def get_soci_vec(ci_vec, nso, nelec):
         return soci_vec
 
 def direct_initialization(las):
+
     ncas = np.sum(las.ncas_sub)
     nqubits = 2*ncas
     qubits = np.arange(nqubits).tolist()

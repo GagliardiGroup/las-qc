@@ -13,6 +13,7 @@ from qiskit.algorithms.optimizers import L_BFGS_B
 
 from custom_UCC import custom_UCC
 from mrh.exploratory.unitary_cc import lasuccsd
+from mrh.exploratory.citools import grad
 
 from lasqc import LASQC
 
@@ -31,7 +32,7 @@ class LASUCC(LASQC):
                 excitations.append((tuple(i), tuple(a[::-1])))
 
         else:
-            get_grad_select() # Add the USCC part here
+            a_sel, i_sel = grad.get_grad_select(las, eps=0.0) # Add the USCC part here
 
 
         return excitations
