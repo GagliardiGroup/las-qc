@@ -5,21 +5,24 @@ Checking against hardcoded values
 '''
 import numpy as np
 
-# PySCF imports
-from pyscf import gto, scf, lib, mcscf, ao2mo
-from pyscf.tools import fcidump
 # mrh imports
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
+
+# PySCF imports
+from pyscf import gto, mcscf, scf
+from qiskit import assemble, transpile
+
+#from qiskit import Aer
+from qiskit_aer import AerSimulator
+
 #from mrh.my_pyscf.mcscf.lasci import h1e_for_cas
 # Qiskit imports
 #from qiskit.utils import QuantumInstance
 from qiskit_algorithms import NumPyEigensolver
-#from qiskit import Aer
-from qiskit_aer import AerSimulator
-from qiskit import transpile, assemble
 
 from postlas.get_geom import get_geom
 from postlas.get_hamiltonian import get_hamiltonian
+
 
 def test_hf():
     '''Test the PySCF RHF'''
