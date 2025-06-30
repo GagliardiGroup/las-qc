@@ -14,10 +14,9 @@ These utility methods are used by the :class:`~.UCC` Ansatz in order to construc
 operators.
 """
 
-from typing import Iterator, List, Tuple, Optional
-
 import itertools
 import logging
+from typing import Iterator, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
