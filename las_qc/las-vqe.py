@@ -95,6 +95,8 @@ las.kernel(loc_mo_coeff)
 loc_mo_coeff = las.mo_coeff
 print("LASSCF energy: ", las.e_tot)
 
+#===================
+
 ncore = las.ncore
 ncas = las.ncas
 ncas_sub = las.ncas_sub
@@ -111,6 +113,7 @@ cas_h1e, e_core = mc.h1e_for_cas()
 eri_cas = mc.get_h2eff(loc_mo_coeff)
 eri = ao2mo.restore(1, eri_cas,mc.ncas)
 
+#===================
 # Gets all acceptable operators for UCCSD
 # excluding intra-fragment ones
 def custom_excitations(num_spin_orbitals: int,
@@ -127,20 +130,22 @@ def custom_excitations(num_spin_orbitals: int,
     
     return excitations
 
-raise NotImplementedError("get_hamiltonian is not implemented yet!")
-# hamiltonian = get_hamiltonian(None, mc.nelecas, mc.ncas, cas_h1e, eri)
-hamiltonian = None
+#===================
+hamiltonian = get_hamiltonian(None, mc.nelecas, mc.ncas, cas_h1e, eri)
 #print(hamiltonian)
 
+#===================
 # Loading the QPE statevector from file
 state_list = np.load('qpe_state_{}.npy'.format(args.dist), allow_pickle=True)
 
+#===================
 # Create a quantum register with system qubits
 qr1 = QuantumRegister(np.sum(ncas_sub)*2, 'q1')
 new_circuit = QuantumCircuit(qr1)
 new_circuit.initialize(state_list[0], qubits=[0,1,4,5])
 new_circuit.initialize(state_list[1], qubits=[2,3,6,7])
 
+#===================
 # Gate counts for initialization
 if args.dist == 0.0:
     target_basis = ['rx', 'ry', 'rz', 'h', 'cx']
@@ -150,6 +155,7 @@ if args.dist == 0.0:
     print("Operations: {}".format(init_op_dict))
     print("Total operations: {}".format(init_ops))
 
+#===================
 # Tracking the convergence of the VQE
 counts = []
 values = []
@@ -157,6 +163,7 @@ def store_intermediate_result(eval_count, parameters, mean, std):
     counts.append(eval_count)
     values.append(mean)
 
+#===================
 qubit_converter = QubitConverter(mapper = JordanWignerMapper(), two_qubit_reduction=False)
 new_instance = QuantumInstance(backend = Aer.get_backend('aer_simulator'), shots=args.shots)
 # Setting up the VQE
@@ -166,6 +173,8 @@ init_pt = np.zeros(146)
 #optimizer = COBYLA(maxiter=1000)
 algorithm = VQE(ansatz=ansatz, optimizer=optimizer, quantum_instance=new_instance, initial_point=init_pt, callback=store_intermediate_result) 
 
+
+#===================
 # Gate counts for VQE (includes initialization)
 if args.dist == 0.0:
     params = np.zeros(146)
@@ -178,6 +187,7 @@ if args.dist == 0.0:
     print("Operations: {}".format(vqe_op_dict))
     print("Total operations: {}".format(vqe_ops))
 
+#===================
 # Running the VQE
 t0 = time.time()
 vqe_result = algorithm.compute_minimum_eigenvalue(hamiltonian)
@@ -187,6 +197,7 @@ print("Time taken for VQE: ",t1-t0)
 print("VQE counts: ", counts)
 print("VQE energies: ", values)
 
+#===================
 # Saving all relevant results in a dict
 if args.dist == 0.0:
     np.save('results_{}_{}_vqe.npy'.format(args.shots, args.dist), {'init_op_dict': init_op_dict, 'init_ops': init_ops, 'vqe_op_dict':vqe_op_dict, 'vqe_ops': vqe_ops, 'vqe_result':vqe_result, 'vqe_en_vals':values, 'vqe_counts':counts, 'nuc_rep': las.energy_nuc()})
