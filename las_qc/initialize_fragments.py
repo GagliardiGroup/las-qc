@@ -34,7 +34,7 @@ def get_soci_vec(ci_vec, nso, nelec):
             f"{kk:0{nso}b}"[norbs:].count("1") == nelec[0]
             and f"{kk:0{nso}b}"[:norbs].count("1") == nelec[1]
         ):
-            so_ci_vec[kk] = ci_vec[
+            soci_vec[kk] = ci_vec[
                 lookup_a[f"{kk:0{nso}b}"[norbs:]],
                 lookup_b[f"{kk:0{nso}b}"[:norbs]],
             ]

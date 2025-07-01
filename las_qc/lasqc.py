@@ -10,7 +10,9 @@ import initialize_fragments as initf
 
 # mrh imports
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
-from pyscf import scf
+from pyscf import lib, scf
+
+from .get_hamiltonian import get_hamiltonian
 
 
 # Define LASQC class
@@ -68,6 +70,8 @@ class LASQC:
                 init_fn = initf.qpe_initialization
             case "vqe":
                 init_fn = initf.vqe_initialization
+            case _:
+                raise ValueError(f"Unknown initilizer `{method}`")
 
         self.init_state = init_fn(**kwargs)
 
@@ -91,13 +95,10 @@ class LASQC:
     def run(self):
         """common things for all methods"""
         if self.init_state is None:
-            self.init_state = initialize_fragments(...)
+            self.init_state = self.initialize_fragments()
 
         if self.mapped_ham is None:
-            self.mapped_ham = get_mapped_hamiltonian()
-
-        result_dict = energy, circuit, gates
+            self.mapped_ham = self.get_mapped_hamiltonian()
 
         if self.__class__ is LASQC:
             raise NotImplementedError("run method not implemented")
-        return result_dict
