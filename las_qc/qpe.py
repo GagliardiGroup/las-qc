@@ -3,33 +3,31 @@
 # fragment wavefunctions using QPE, then save the state 
 #########################
 
-import numpy as np
-import logging
 import time
 from argparse import ArgumentParser
-# PySCF imports
-from pyscf import gto, scf, lib, mcscf, ao2mo
-from pyscf.tools import fcidump
-# mrh imports
-from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
-from mrh.my_pyscf.mcscf.lasci import h1e_for_cas
+
+import numpy as np
+
 #from c4h6_struct import structure
 from get_geom import get_geom
 from get_hamiltonian import get_hamiltonian
 
-# Qiskit imports
-from qiskit.providers.aer import StatevectorSimulator, QasmSimulator
-from qiskit import Aer, transpile
-from qiskit import QuantumCircuit
-from qiskit_nature.converters.second_quantization import QubitConverter
-from qiskit_nature.mappers.second_quantization import JordanWignerMapper, ParityMapper
-from qiskit.quantum_info import Statevector
-from qiskit.utils import QuantumInstance
-from qiskit_nature.algorithms import VQEUCCFactory, GroundStateEigensolver
-from qiskit_nature.circuit.library import HartreeFock
+# mrh imports
+from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
+
+# PySCF imports
+from pyscf import gto, lib, scf
+from qiskit import Aer, QuantumCircuit, transpile
 from qiskit.algorithms import NumPyEigensolver, PhaseEstimation, PhaseEstimationScale
 from qiskit.algorithms.phase_estimators import PhaseEstimationResult
-from qiskit.opflow import PauliTrotterEvolution,SummedOp,PauliOp,PauliSumOp,StateFn
+from qiskit.opflow import PauliOp, PauliSumOp, PauliTrotterEvolution, SummedOp
+
+# Qiskit imports
+from qiskit.quantum_info import Statevector
+from qiskit.utils import QuantumInstance
+from qiskit_nature.circuit.library import HartreeFock
+from qiskit_nature.converters.second_quantization import QubitConverter
+from qiskit_nature.mappers.second_quantization import JordanWignerMapper
 
 parser = ArgumentParser(description='Do LAS-QPE, specifying num of ancillas and shots')
 parser.add_argument('--an', type=int, default=1, help='number of ancilla qubits')

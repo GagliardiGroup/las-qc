@@ -20,6 +20,7 @@ from functools import partial
 from itertools import chain
 from typing import Callable, Sequence, Dict, Any
 
+from fermionic_excitation_generator import generate_fermionic_excitations
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import EvolvedOperatorAnsatz
 

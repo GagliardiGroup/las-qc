@@ -5,14 +5,17 @@ from qiskit_nature.second_q.mappers import JordanWignerMapper
 
 def get_hamiltonian(frag, nelecas_sub, ncas_sub, h1, h2, mapper=JordanwignerMapper()):
     if frag is None:
-        num_alpha = nelecas_sub[0]
-        num_beta = nelecas_sub[1]
-        n_so = ncas_sub*2
+        ...
+        # Unused variables are comment
+        # num_alpha = nelecas_sub[0]
+        # num_beta = nelecas_sub[1]
+        # n_so = ncas_sub*2
     else:
+        # Unused variables are comment
         # Get alpha and beta electrons from LAS
-        num_alpha = nelecas_sub[frag][0]
-        num_beta = nelecas_sub[frag][1]
-        n_so = ncas_sub[frag]*2
+        # num_alpha = nelecas_sub[frag][0]
+        # num_beta = nelecas_sub[frag][1]
+        # n_so = ncas_sub[frag]*2
         h1 = h1[frag]
         h2 = h2[frag]
 
