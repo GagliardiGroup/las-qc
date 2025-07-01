@@ -13,6 +13,7 @@ dependencies = [
     # "mhr", # Make this versioned
     "qiskit >= 1.4, < 2", # We'll move to 2 eventually
     "qiskit-nature", # Let this be determined by the version of qiskit
+    "qiskit-aer",
     "numpy >= 1.21",
 ]
 dynamic = ["version"]
