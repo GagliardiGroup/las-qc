@@ -73,7 +73,9 @@ def get_beta_excitations(
         the occupied spin orbital index and the second entry the unoccupied one.
     """
     if generalized:
-        return list(itertools.combinations(range(num_spin_orbitals // 2, num_spin_orbitals), 2))
+        return list(
+            itertools.combinations(range(num_spin_orbitals // 2, num_spin_orbitals), 2)
+        )
 
     beta_index_offset = num_spin_orbitals // 2
     beta_occ = range(beta_index_offset, beta_index_offset + num_beta)
@@ -146,20 +148,26 @@ def generate_fermionic_excitations(
             alpha_excitations = get_alpha_excitations(
                 num_particles[0], num_spin_orbitals, generalized
             )
-            logger.debug("Generated list of single alpha excitations: %s", alpha_excitations)
+            logger.debug(
+                "Generated list of single alpha excitations: %s", alpha_excitations
+            )
 
         if beta_spin:
             beta_excitations = get_beta_excitations(
                 num_particles[1], num_spin_orbitals, generalized
             )
-            logger.debug("Generated list of single beta excitations: %s", beta_excitations)
+            logger.debug(
+                "Generated list of single beta excitations: %s", beta_excitations
+            )
 
     else:
         # We can reuse our existing implementation for the scenario involving spin flips by
         # generating the single excitations of an _interleaved_ spin orbital system.
         # For this, we can reuse the alpha single excitation generator in a system of double the
         # actual size.
-        single_excitations = get_alpha_excitations(sum(num_particles), num_spin_orbitals * 2, False)
+        single_excitations = get_alpha_excitations(
+            sum(num_particles), num_spin_orbitals * 2, False
+        )
 
         def interleaved2blocked(index: int, total: int) -> int:
             if index % 2 == 0:
@@ -168,7 +176,7 @@ def generate_fermionic_excitations(
             return (index - 1 + total) // 2
 
         # we now split the generated single excitations into separate spin species
-        for (occ_interleaved, unocc_interleaved) in single_excitations:
+        for occ_interleaved, unocc_interleaved in single_excitations:
             # we map from interleaved to blocked spin orbital indices
             occ_blocked = interleaved2blocked(occ_interleaved, num_spin_orbitals)
             unocc_blocked = interleaved2blocked(unocc_interleaved, num_spin_orbitals)
@@ -233,4 +241,3 @@ def generate_fermionic_excitations(
             logger.debug("Added the excitation: %s", exc_tuple)
 
     return excitations
-

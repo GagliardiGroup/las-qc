@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "las-qc"
 description = "Quantum-Base Post-LAS Algorithms"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = ["ab initio", "chemistry", "quantum computing"]
 license = { text = "Apache-2.0" }
 dependencies = [
