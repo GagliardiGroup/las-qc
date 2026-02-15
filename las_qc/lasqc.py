@@ -42,8 +42,6 @@ class LASQC:
             las.kernel(loc_mo_coeff)
             print("LASSCF energy: ", las.e_tot)
 
-        print (mol, las, mf, frag_orbs, frag_elec, frag_atom_list, spin_sub)
-
         self.mf = mf
         self.las = las
         self.mol = las.mol
@@ -77,11 +75,9 @@ class LASQC:
 
     def get_mapped_hamiltonian(self):
         h1, e_core = self.las.h1e_for_cas()
-        print (h1)
         h2 = ao2mo.restore(
             1, self.mc.get_h2eff(self.mo_coeff), self.mc.ncas
         )
-        print (h2.shape)
         hamiltonian = get_hamiltonian (None, self.nelecas, self.ncas, h1, h2)
         return hamiltonian
 
