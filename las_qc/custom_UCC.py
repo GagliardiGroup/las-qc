@@ -27,7 +27,6 @@ from qiskit_nature import QiskitNatureError
 from qiskit_nature.second_q.mappers import QubitMapper, TaperedQubitMapper
 from qiskit_nature.second_q.operators import FermionicOp, SparseLabelOp
 
-from .fermionic_excitation_generator import generate_fermionic_excitations
 from las_qc.custom_excitations import generate_uscc_excitations
 
 logger = logging.getLogger(__name__)
