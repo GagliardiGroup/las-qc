@@ -37,7 +37,6 @@ frag_spins = (3,1)
 
 eps = [0.01, 0.001]
 
-from las_qc.lasqc import LASQC
 solver = LASUCC(
     mol,
     las=las,
