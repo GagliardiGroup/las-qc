@@ -1,5 +1,4 @@
-import numpy as np
-from pyscf import gto, scf, lib, mcscf
+from pyscf import gto, scf, mcscf
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
 from las_qc.lasucc import LASUCC
 
