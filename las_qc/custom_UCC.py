@@ -490,8 +490,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
             if self.excitations == "selected":
                 uscc_kwargs = {
                         "las": self._las,
-                        "epsilon": self._epsilon,
-                        "verbose": self._verbose
+                        "epsilon": self._epsilon #add verbose
                 }
                 generators = [partial(generate_uscc_excitations, **uscc_kwargs)]
             else:
