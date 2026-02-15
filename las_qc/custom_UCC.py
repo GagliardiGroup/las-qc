@@ -20,16 +20,15 @@ from functools import partial
 from itertools import chain
 from typing import Any, Callable, Dict, Sequence
 
-from feg import generate_fermionic_excitations
-from fermionic_excitation_generator import generate_fermionic_excitations
+from las_qc.fermionic_excitation_generator import generate_fermionic_excitations
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import EvolvedOperatorAnsatz
 from qiskit_nature import QiskitNatureError
 from qiskit_nature.second_q.mappers import QubitMapper, TaperedQubitMapper
 from qiskit_nature.second_q.operators import FermionicOp, SparseLabelOp
 
-# SV add uscc_excitations
-from .utils.fermionic_excitation_generator import generate_fermionic_excitations
+from .fermionic_excitation_generator import generate_fermionic_excitations
+from las_qc.custom_excitations import generate_uscc_excitations
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +148,10 @@ class custom_UCC(EvolvedOperatorAnsatz):
         include_imaginary: bool = False,
         reps: int = 1,
         initial_state: QuantumCircuit | None = None,
+        num_sub: list | None = None,
+        lasucc_wfn=None,
+        las=None,
+        epsilon=0.0 # Add verbose
     ) -> None:
         # pylint: disable=unused-argument
         """
@@ -207,6 +210,11 @@ class custom_UCC(EvolvedOperatorAnsatz):
         self._generalized = generalized
         self._preserve_spin = preserve_spin
         self._include_imaginary = include_imaginary
+        self._num_sub = num_sub
+        self._ucc = lasucc_wfn
+        self._las = las
+        self._epsilon = epsilon # Add verbose
+
 
         super().__init__(reps=reps, initial_state=initial_state)
 
@@ -479,14 +487,22 @@ class custom_UCC(EvolvedOperatorAnsatz):
         }
 
         if isinstance(self.excitations, str):
-            for exc in self.excitations:
-                generators.append(
-                    partial(
-                        generate_fermionic_excitations,
-                        num_excitations=self._EXCITATION_TYPE[exc],
-                        **extra_kwargs,
+            if self.excitations == "selected":
+                uscc_kwargs = {
+                        "las": self._las,
+                        "epsilon": self._epsilon,
+                        "verbose": self._verbose
+                }
+                generators = [partial(generate_uscc_excitations, **uscc_kwargs)]
+            else:
+                for exc in self.excitations:
+                    generators.append(
+                        partial(
+                            generate_fermionic_excitations,
+                            num_excitations=self._EXCITATION_TYPE[exc],
+                            **extra_kwargs,
+                        )
                     )
-                )
         elif isinstance(self.excitations, int):
             generators.append(
                 partial(
@@ -547,6 +563,13 @@ class custom_UCC(EvolvedOperatorAnsatz):
                         excitation=excitation,
                     )
                 )
+#SV this part is commented to match mrh amplitudes
+            #if any(i in excitation[0] for i in excitation[1]) or any(
+                #len(set(indices)) != len(indices) for indices in excitation
+            #):
+                #raise QiskitNatureError(
+                    #error_message.format(error="Duplicated indices", excitation=excitation)
+                #)
 
     # SV this part is commented in Abhishek's file
     # if any(i in excitation[0] for i in excitation[1]) or any(
