@@ -4,24 +4,33 @@
 #########################
 
 import numpy as np
-from qiskit import Aer, QuantumCircuit, QuantumRegister
-from qiskit.utils import QuantumInstance
-from qiskit_nature.converters.second_quantization import QubitConverter
-from qiskit_nature.mappers.second_quantization import JordanWignerMapper
-from qiskit.algorithms import VQE
-from qiskit.algorithms.optimizers import L_BFGS_B
+from qiskit import QuantumCircuit, qpy
+from qiskit_aer.primitives import Estimator as AerEstimator
+from qiskit_algorithms.minimum_eigensolvers import VQE
+from qiskit_algorithms.optimizers import L_BFGS_B
+from qiskit_nature.second_q.mappers import JordanWignerMapper
+from qiskit_nature.second_q.mappers.fermionic_mapper import FermionicMapper
+from qiskit.primitives import Estimator, BaseEstimator
 
-from custom_UCC import custom_UCC
+from las_qc.custom_UCC import custom_UCC
 from mrh.exploratory.unitary_cc import lasuccsd
 from mrh.exploratory.citools import grad
 
-from lasqc import LASQC
+from .lasqc import LASQC
 
 class LASUCC(LASQC):
-    
+
+    def __init__(self, mol, *, epsilon=0.0, **kwargs):
+        super().__init__(mol, **kwargs)
+
+        self.init_state = None
+        self.mapped_ham = None
+        self.ansatz = None
+        self.e_tot = None
+        self.epsilon = epsilon
 
     def _custom_excitations(self, num_spin_orbitals, num_particles, num_sub, eps=0.0):
-        '''Give an option for full list or selected list of excitations for USCC; must be moved to custom_UCC file'''
+        '''Give an option for full list or selected list of excitations for USCC; must be moved to custom_UCC file---  !!! this needs to be defined outside due to a circular import'''
         if eps==0.0:
             excitations = []
             norb = int(num_spin_orbitals / 2)
@@ -32,44 +41,46 @@ class LASUCC(LASQC):
                 excitations.append((tuple(i), tuple(a[::-1])))
 
         else:
-            a_sel, i_sel = grad.get_grad_select(las, eps=0.0) # Add the USCC part here
-
+            a_sel, i_sel = grad.get_grad_select(self.las, eps=0.0) # Add the USCC part here
 
         return excitations
 
 
     def generate_ansatz(self, init_state):
         ansatz = custom_UCC(
-            num_particles=(2, 2),
-            num_spin_orbitals=n_qubits,
-            initial_state=init_circ,
-            epsilon=0.0
-            preserve_spin=False
+            num_spatial_orbitals=self.las.ncas,
+            num_particles=self.las.nelecas,
+            excitations="selected",
+            qubit_mapper=JordanWignerMapper(),
+            initial_state=init_state,
+            epsilon=self.epsilon,
+            preserve_spin=False,
+            las=self.las,
         )
         return ansatz
 
     def run(self, statevectors=None, anstaz=None, estimator=None, optimizer=None):
         super().run()
+
         print("[LASUCC] Running LAS-UCC with VQE...")
-
-
-        n_qubits = np.sum(self.ncas_sub) * 2
         
-        if self.ansatz is None:
-            self.ansatz = self.generate_anstaz(self.init_state) # add verbose
-
+        self.ansatz = self.generate_ansatz(self.init_state) # add verbose
 
         optimizer = L_BFGS_B(maxfun=10000, iprint=101)
-        init_pt = np.zeros(ansatz.num_parameters)
+        init_pt = np.zeros(self.ansatz.num_parameters)
+
+        estimator = AerEstimator() # need to update EstimatorV2!
 
         algorithm = VQE(
-            ansatz=ansatz,
+            ansatz=self.ansatz,
             optimizer=optimizer,
-            quantum_instance=instance,
+            estimator=estimator,
             initial_point=init_pt
         )
+        #print ("UCC = ", self.mapped_ham)
+        result = algorithm.compute_minimum_eigenvalue(self.mapped_ham)
 
-        result = algorithm.compute_minimum_eigenvalue(hamiltonian)
-        self.e_tot = result.eigenvalue.real
+        self.e_tot = result.eigenvalue.real + self.las.h1e_for_cas()[1]
+
         print("[LASUCC] Final LAS-UCC energy:", self.e_tot)
         return self.e_tot
