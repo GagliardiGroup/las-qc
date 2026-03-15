@@ -10,17 +10,17 @@ xyz = '''H 0.000000 0.000000 0.000000
          H 2.190506 2.456644 -0.188973'''
 mol = gto.M (atom = xyz, basis = 'sto-3g', output='h4_sto3g.log.py',
     verbose=4)
-mf = scf.RHF (mol).run ()
-ref = mcscf.CASSCF (mf, 4, (3,1)).run (verbose=4) # = FCI
+mf = scf.RHF(mol).run ()
+ref = mcscf.CASSCF(mf, 4, (3,1)).run(verbose=4) # = FCI
 print ("ref CAS = ", ref.e_tot)
 
 # Running LASSCF
 #===================================
-las = LASSCF (mf, (2,2), ((2,0),(1,1)), spin_sub=(3,1))
+las = LASSCF(mf, (2,2), ((2,0),(1,1)), spin_sub=(3,1))
 las.verbose=4
 frag_atom_list = ((0,1),(2,3))
 mo_loc = las.localize_init_guess (frag_atom_list, mf.mo_coeff)
-las.kernel (mo_loc)
+las.kernel(mo_loc)
 print ("LASSCF = ", las.e_tot)
 
 # Running CASCI@LAS

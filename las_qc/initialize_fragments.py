@@ -1,5 +1,5 @@
 import numpy as np
-from qiskit import QuantumRegister, QuantumCircuit
+from qiskit import QuantumCircuit, QuantumRegister
 
 '''
 This is for returning a quantum circuit. 
