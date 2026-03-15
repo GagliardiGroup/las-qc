@@ -8,11 +8,11 @@
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
 
 # PySCF imports
-from pyscf import ao2mo, lib, mcscf, scf
-from qiskit.primitives import BaseEstimator, Estimator
-from qiskit_aer.primitives import Estimator as AerEstimator
-from qiskit_nature.second_q.mappers import JordanWignerMapper
-from qiskit_nature.second_q.mappers.fermionic_mapper import FermionicMapper
+from pyscf import ao2mo, lib, mcscf, scf, gto
+#from qiskit.primitives import BaseEstimator, Estimator
+#from qiskit_aer.primitives import Estimator as AerEstimator
+#from qiskit_nature.second_q.mappers import JordanWignerMapper
+#from qiskit_nature.second_q.mappers.fermionic_mapper import FermionicMapper
 
 import las_qc.initialize_fragments as initf
 from las_qc.get_hamiltonian import get_hamiltonian
