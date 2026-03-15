@@ -20,7 +20,6 @@ from functools import partial
 from itertools import chain
 from typing import Any, Callable, Dict, Sequence
 
-from las_qc.fermionic_excitation_generator import generate_fermionic_excitations
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import EvolvedOperatorAnsatz
 from qiskit_nature import QiskitNatureError
@@ -28,6 +27,7 @@ from qiskit_nature.second_q.mappers import QubitMapper, TaperedQubitMapper
 from qiskit_nature.second_q.operators import FermionicOp, SparseLabelOp
 
 from las_qc.custom_excitations import generate_uscc_excitations
+from las_qc.fermionic_excitation_generator import generate_fermionic_excitations
 
 logger = logging.getLogger(__name__)
 
