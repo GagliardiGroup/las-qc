@@ -49,3 +49,7 @@ solver = LASUCC(
 )
 vqe_en = solver.run()
 print(f"LAS-VQE Energy: {vqe_en:.12f} Ha | Epsilon: {eps[0]:.12f}")
+
+print ("Ref LAS-USCC-VQE Energy: -1.905978023918")
+
+### LAS-VQE Energy: -1.905978023918 Ha | Epsilon: 0.010000000000 # reference value from previous code
