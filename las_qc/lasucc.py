@@ -67,7 +67,7 @@ class LASUCC(LASQC):
         optimizer = L_BFGS_B(maxfun=10000, iprint=101)
         init_pt = np.zeros(self.ansatz.num_parameters)
 
-        estimator = AerEstimator() # need to update EstimatorV2!
+        estimator = AerEstimator(approximation=True) # need to update to EstimatorV2 maybe later
 
         algorithm = VQE(
             ansatz=self.ansatz,
@@ -75,12 +75,12 @@ class LASUCC(LASQC):
             estimator=estimator,
             initial_point=init_pt
         )
-        #print ("UCC = ", self.mapped_ham)
+        
         result = algorithm.compute_minimum_eigenvalue(self.mapped_ham)
 
         self.e_tot = result.eigenvalue.real + self.las.h1e_for_cas()[1]
-
         print("[LASUCC] Final LAS-UCC energy:", self.e_tot)
+        
         print ("VQE result:")
         print (result)
         return self.e_tot
