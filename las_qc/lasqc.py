@@ -8,12 +8,12 @@
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
 
 # PySCF imports
-from pyscf import ao2mo, lib, mcscf, scf, gto
+from pyscf import ao2mo, mcscf, scf
+
 #from qiskit.primitives import BaseEstimator, Estimator
 #from qiskit_aer.primitives import Estimator as AerEstimator
 #from qiskit_nature.second_q.mappers import JordanWignerMapper
 #from qiskit_nature.second_q.mappers.fermionic_mapper import FermionicMapper
-
 import las_qc.initialize_fragments as initf
 from las_qc.get_hamiltonian import get_hamiltonian
 
@@ -92,14 +92,4 @@ class LASQC:
         if self.__class__ is LASQC:
             raise NotImplementedError ("run method not implemented")
 
-if __name__ == '__main__':
-
-    xyz = get_geom('far')
-    mol = gto.M (atom = xyz, basis = 'sto-3g', output='h4_sto3g.log',
-        symmetry=False, verbose=lib.logger.DEBUG)
-    lasqc_wfn = LASQC(mol, frag_orbs=(2,2), frag_elec=(2,2), frag_atom_list=((0,1),(2,3)), spin_sub=(1,1))
-
-    # Choose one post-LAS solver
-    solver = LASUCC(lasqc.las)  # or LASUCC, LASQKSD
-    solver.kernel()
 

@@ -11,6 +11,7 @@ import time
 from argparse import ArgumentParser
 from typing import List, Tuple
 
+import get_hamiltonian
 import numpy as np
 from custom_UCC import custom_UCC
 
