@@ -6,13 +6,10 @@
 import numpy as np
 from mrh.exploratory.citools import grad
 from mrh.exploratory.unitary_cc import lasuccsd
-from qiskit import QuantumCircuit, qpy
-from qiskit.primitives import BaseEstimator, Estimator
 from qiskit_aer.primitives import Estimator as AerEstimator
 from qiskit_algorithms.minimum_eigensolvers import VQE
 from qiskit_algorithms.optimizers import L_BFGS_B
 from qiskit_nature.second_q.mappers import JordanWignerMapper
-from qiskit_nature.second_q.mappers.fermionic_mapper import FermionicMapper
 
 from las_qc.custom_UCC import custom_UCC
 
@@ -84,4 +81,7 @@ class LASUCC(LASQC):
         self.e_tot = result.eigenvalue.real + self.las.h1e_for_cas()[1]
 
         print("[LASUCC] Final LAS-UCC energy:", self.e_tot)
+        print ("VQE result:")
+        print (result)
         return self.e_tot
+
