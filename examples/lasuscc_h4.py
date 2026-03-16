@@ -1,5 +1,6 @@
-from pyscf import gto, scf, mcscf
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
+from pyscf import gto, mcscf, scf
+
 from las_qc.lasucc import LASUCC
 
 # Initializing the molecule with RHF
