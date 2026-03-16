@@ -1,6 +1,6 @@
-# This code is part of a Qiskit project.
+# This code is part of Qiskit.
 #
-# (C) Copyright IBM 2021, 2025.
+# (C) Copyright IBM 2021, 2023.
 #
 # This code is licensed under the Apache License, Version 2.0. You may
 # obtain a copy of this license in the LICENSE.txt file in the root directory
@@ -9,27 +9,46 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
-"""
-The Unitary Coupled-Cluster Ansatz.
-"""
 
 from __future__ import annotations
 
 import logging
 from functools import partial
 from itertools import chain
-from typing import Any, Callable, Dict, Sequence
+from typing import Callable, Sequence
 
+import qiskit_nature
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import EvolvedOperatorAnsatz
 from qiskit_nature import QiskitNatureError
-from qiskit_nature.second_q.mappers import QubitMapper, TaperedQubitMapper
+
+# print(qiskit_nature.__path__)
+# from qiskit_nature.deprecation import (
+#    deprecate_arguments,
+#    deprecate_property,
+#    warn_deprecated_type,
+# )
+from qiskit_nature.second_q.mappers import (
+    QubitMapper,
+    TaperedQubitMapper,
+)
 from qiskit_nature.second_q.operators import FermionicOp, SparseLabelOp
 
 from las_qc.custom_excitations import generate_uscc_excitations
-from las_qc.fermionic_excitation_generator import generate_fermionic_excitations
+
+#from las_qc.feg import generate_fermionic_excitations
+from .fermionic_excitation_generator import generate_fermionic_excitations
+
+#from las_qc.lasucc import generate_uscc_excitations
 
 logger = logging.getLogger(__name__)
+
+"""A modified generalized Unitary Coupled-Cluster Ansatz.
+
+This UCC ansatz has been modified from the original in qiskit to allow
+excitations between all sets of orbitals, as required by a multireference
+reference wave function.
+"""
 
 
 class custom_UCC(EvolvedOperatorAnsatz):
@@ -127,19 +146,17 @@ class custom_UCC(EvolvedOperatorAnsatz):
         self,
         num_spatial_orbitals: int | None = None,
         num_particles: tuple[int, int] | None = None,
-        excitations: (
-            str
-            | int
-            | list[int]
-            | Callable[
-                [int, tuple[int, int]],
-                list[tuple[tuple[int, ...], tuple[int, ...]]],
-            ]
-            | None
-        ) = None,
+        excitations: str
+        | int
+        | list[int]
+        | Callable[
+            [int, tuple[int, int]],
+            list[tuple[tuple[int, ...], tuple[int, ...]]],
+        ]
+        | None = None,
         qubit_mapper: QubitMapper | None = None,
         *,
-        alpha_spin: bool = True, # SV remove excitations and add epsilon
+        alpha_spin: bool = True,
         beta_spin: bool = True,
         max_spin_excitation: int | None = None,
         generalized: bool = False,
@@ -150,7 +167,8 @@ class custom_UCC(EvolvedOperatorAnsatz):
         num_sub: list | None = None,
         lasucc_wfn=None,
         las=None,
-        epsilon=0.0 # Add verbose
+        epsilon=0.0,
+        verbose=1,
     ) -> None:
         # pylint: disable=unused-argument
         """
@@ -173,8 +191,9 @@ class custom_UCC(EvolvedOperatorAnsatz):
                     to write such a callable refer to the default method
                     :meth:`~qiskit_nature.second_q.circuit.library.ansatzes.utils.\
                     generate_fermionic_excitations`.
-            qubit_mapper: The :class:`~qiskit_nature.second_q.mappers.QubitMapper` which takes care
-                of mapping to a qubit operator.
+            qubit_mapper: The :class:`~qiskit_nature.second_q.mappers.QubitMapper` or
+                :class:`~qiskit_nature.second_q.mappers.QubitConverter` instance (use of the latter
+                is deprecated) which takes care of mapping to a qubit operator.
             alpha_spin: Boolean flag whether to include alpha-spin excitations.
             beta_spin: Boolean flag whether to include beta-spin excitations.
             max_spin_excitation: The largest number of excitations within a spin. E.g. you can set
@@ -186,8 +205,6 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 only determined from the number of spin orbitals and independent from the number of
                 particles.
             preserve_spin: Boolean flag whether or not to preserve the particle spins.
-            include_imaginary: Boolean flag which when set to ``True`` expands the ansatz to include
-                imaginary parts using twice the number of free parameters.
             reps: The number of times to repeat the evolved operators.
             initial_state: A ``QuantumCircuit`` object to prepend to the circuit. Note that this
                 setting does *not* influence the ``excitations``. When relying on the default
@@ -198,6 +215,10 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 likely you will also want to use a
                 :class:`~qiskit_nature.second_q.algorithms.initial_points.HFInitialPoint` that has
                 been configured using the corresponding ansatz parameters.
+            qubit_converter: DEPRECATED The :class:`~qiskit_nature.second_q.mappers.QubitConverter`
+                or :class:`~qiskit_nature.second_q.mappers.QubitMapper` instance which takes care of
+                mapping to a qubit operator.
+            verbose: The verbosity of printing
         """
         self._qubit_mapper = qubit_mapper
         self._num_particles = num_particles
@@ -212,13 +233,15 @@ class custom_UCC(EvolvedOperatorAnsatz):
         self._num_sub = num_sub
         self._ucc = lasucc_wfn
         self._las = las
-        self._epsilon = epsilon # Add verbose
-
+        self._epsilon = epsilon
+        self._verbose = verbose
 
         super().__init__(reps=reps, initial_state=initial_state)
 
         # To give read access to the actual excitation list that UCC is using.
-        self._excitation_list: list[tuple[tuple[int, ...], tuple[int, ...]]] | None = None
+        self._excitation_list: list[
+            tuple[tuple[int, ...], tuple[int, ...]]
+        ] | None = None
 
         # We cache these, because the generation may be quite expensive (depending on the generator)
         # and the user may want quick access to inspect these. Also, it speeds up testing for the
@@ -281,7 +304,9 @@ class custom_UCC(EvolvedOperatorAnsatz):
         self._excitations = exc
 
     @property
-    def excitation_list(self) -> list[tuple[tuple[int, ...], tuple[int, ...]]] | None:
+    def excitation_list(
+        self,
+    ) -> list[tuple[tuple[int, ...], tuple[int, ...]]] | None:
         """The excitation list that UCC is using.
 
         Raises:
@@ -316,24 +341,29 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 # by algorithms such as `AdaptVQE`.
                 excitation_ops = self.excitation_ops()
 
-                logger.debug("Converting second-quantized into qubit operators...")
-                # Convert operators according to saved state in mapper from the conversion of the
+                logger.debug(
+                    "Converting second-quantized into qubit operators..."
+                )
+                # Convert operators according to saved state in converter from the conversion of the
                 # main operator since these need to be compatible. If Z2 Symmetry tapering was done
                 # it may be that one or more excitation operators do not commute with the symmetry.
-                # The converted operators are maintained at the same index by the mapper
+                # The converted operators are maintained at the same index by the converter
                 # inserting ``None`` as the result if an operator did not commute. To ensure that
                 # the ``excitation_list`` is transformed identically to the operators, we retain
                 # ``None`` for non-commuting operators in order to manually remove them in unison.
                 if isinstance(self.qubit_mapper, TaperedQubitMapper):
                     operators = self.qubit_mapper.map_clifford(excitation_ops)
-                    operators = self.qubit_mapper.taper_clifford(operators, suppress_none=False)
+                    operators = self.qubit_mapper.taper_clifford(
+                        operators, suppress_none=False
+                    )
                 else:
                     operators = self.qubit_mapper.map(excitation_ops)
-
                 if self._include_imaginary:
                     # duplicate each excitation to account for the real and imaginary parts.
                     self._excitation_list = list(
-                        chain(*zip(self._excitation_list, self._excitation_list))
+                        chain(
+                            *zip(self._excitation_list, self._excitation_list)
+                        )
                     )
 
                 self._filter_operators(operators=operators)
@@ -369,7 +399,9 @@ class custom_UCC(EvolvedOperatorAnsatz):
         # or ahead of building operators to make sure everything needed is present.
         if self.num_spatial_orbitals is None:
             if raise_on_failure:
-                raise ValueError("The number of spatial orbitals cannot be 'None'.")
+                raise ValueError(
+                    "The number of spatial orbitals cannot be 'None'."
+                )
             return False
 
         if self.num_spatial_orbitals <= 0:
@@ -392,20 +424,10 @@ class custom_UCC(EvolvedOperatorAnsatz):
             return False
 
         if not self._generalized:
-            if all(n == self.num_spatial_orbitals for n in self.num_particles):
+            if any(n >= self.num_spatial_orbitals for n in self.num_particles):
                 if raise_on_failure:
                     raise ValueError(
-                        f"UCC calculations for fully occupied alpha and beta orbitals "
-                        f"is still not implemented. The current system contains "
-                        f"{self.num_spatial_orbitals} orbitals for {self.num_particles} "
-                        f"(alpha, beta) particles."
-                    )
-                return False
-
-            if any(n > self.num_spatial_orbitals for n in self.num_particles):
-                if raise_on_failure:
-                    raise ValueError(
-                        f"The number of spatial orbitals {self.num_spatial_orbitals} "
+                        f"The number of spatial orbitals {self.num_spatial_orbitals}"
                         f"must be greater than number of particles of any spin kind "
                         f"{self.num_particles}."
                     )
@@ -446,7 +468,9 @@ class custom_UCC(EvolvedOperatorAnsatz):
         self._excitation_ops = excitation_ops
         return excitation_ops
 
-    def _get_excitation_list(self) -> list[tuple[tuple[int, ...], tuple[int, ...]]]:
+    def _get_excitation_list(
+        self,
+    ) -> list[tuple[tuple[int, ...], tuple[int, ...]]]:
         generators = self._get_excitation_generators()
 
         logger.debug("Generating excitation list...")
@@ -456,7 +480,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 gen(  # pylint: disable=not-callable
                     num_spatial_orbitals=self.num_spatial_orbitals,
                     num_particles=self.num_particles,
-                    num_sub=[self.num_spatial_orbitals//2, self.num_spatial_orbitals//2]
+                    num_sub=self._num_sub,
                 )
             )
 
@@ -466,23 +490,24 @@ class custom_UCC(EvolvedOperatorAnsatz):
         logger.debug("Gathering excitation generators...")
         generators: list[Callable] = []
 
-        extra_kwargs: Dict[str, Any] = {
-            "alpha_spin": bool(self._alpha_spin),
-            "beta_spin": bool(self._beta_spin),
-            "max_spin_excitation": (
-                int(self._max_spin_excitation) if self._max_spin_excitation is not None else None
-            ),
-            "generalized": bool(self._generalized),
-            "preserve_spin": bool(self._preserve_spin),
+        extra_kwargs = {
+            "alpha_spin": self._alpha_spin,
+            "beta_spin": self._beta_spin,
+            "max_spin_excitation": self._max_spin_excitation,
+            "generalized": self._generalized,
+            "preserve_spin": self._preserve_spin,
         }
 
         if isinstance(self.excitations, str):
             if self.excitations == "selected":
                 uscc_kwargs = {
-                        "las": self._las,
-                        "epsilon": self._epsilon #add verbose
+                    "las": self._las,
+                    "epsilon": self._epsilon,
+                    "verbose": self._verbose
                 }
-                generators = [partial(generate_uscc_excitations, **uscc_kwargs)]
+                generators = [
+                    partial(generate_uscc_excitations, **uscc_kwargs)
+                ]  # any kwargs needed for USCC
             else:
                 for exc in self.excitations:
                     generators.append(
@@ -495,21 +520,27 @@ class custom_UCC(EvolvedOperatorAnsatz):
         elif isinstance(self.excitations, int):
             generators.append(
                 partial(
-                    generate_fermionic_excitations, num_excitations=self.excitations, **extra_kwargs
+                    generate_fermionic_excitations,
+                    num_excitations=self.excitations,
+                    **extra_kwargs,
                 )
             )
         elif isinstance(self.excitations, list):
-            for excitation in self.excitations:
+            for exc in self.excitations:  # type: ignore
                 generators.append(
                     partial(
-                        generate_fermionic_excitations, num_excitations=excitation, **extra_kwargs
+                        generate_fermionic_excitations,
+                        num_excitations=exc,
+                        **extra_kwargs,
                     )
                 )
         elif callable(self.excitations):
             generators = [self.excitations]
         else:
-            raise QiskitNatureError(f"Invalid excitation configuration: {self.excitations}")
-
+            raise QiskitNatureError(
+                f"Invalid excitation configuration: {self.excitations}"
+            )
+        print ("SV generators = ", generators)
         return generators
 
     def _check_excitation_list(self, excitations: Sequence) -> None:
@@ -533,7 +564,9 @@ class custom_UCC(EvolvedOperatorAnsatz):
         for excitation in excitations:
             if len(excitation) != 2:
                 raise QiskitNatureError(
-                    error_message.format(error="Invalid number of tuples", excitation=excitation)
+                    error_message.format(
+                        error="Invalid number of tuples", excitation=excitation
+                    )
                     + "; Two tuples are expected, e.g. ((0, 1, 4), (2, 3, 6))"
                 )
 
@@ -544,15 +577,18 @@ class custom_UCC(EvolvedOperatorAnsatz):
                         excitation=excitation,
                     )
                 )
-#SV this part is commented to match mrh amplitudes
-            #if any(i in excitation[0] for i in excitation[1]) or any(
-                #len(set(indices)) != len(indices) for indices in excitation
-            #):
-                #raise QiskitNatureError(
-                    #error_message.format(error="Duplicated indices", excitation=excitation)
-                #)
 
-    def _build_fermionic_excitation_ops(self, excitations: Sequence) -> list[FermionicOp]:
+            # Commenting this out to be able to match Matt's amplitudes
+            # if any(i in excitation[0] for i in excitation[1]) or any(
+            #    len(set(indices)) != len(indices) for indices in excitation
+            # ):
+            #    raise QiskitNatureError(
+            #        error_message.format(error="Duplicated indices", excitation=excitation)
+            #    )
+
+    def _build_fermionic_excitation_ops(
+        self, excitations: Sequence
+    ) -> list[FermionicOp]:
         """Builds all possible excitation operators with the given number of excitations for the
         specified number of particles distributed in the number of orbitals.
 
@@ -571,15 +607,13 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 label.append(f"+_{occ}")
             for unocc in exc[1]:
                 label.append(f"-_{unocc}")
-            op = FermionicOp({" ".join(label): 1}, num_spin_orbitals=num_spin_orbitals)
-            op_adj = op.adjoint()
+            op = FermionicOp(
+                {" ".join(label): 1}, num_spin_orbitals=num_spin_orbitals
+            )
+            op -= op.adjoint()
             # we need to account for an additional imaginary phase in the exponent accumulated from
-            # the first-order trotterization routine implemented in Qiskit
-            op_minus = 1j * (op - op_adj)
-            operators.append(op_minus)
-
-            if self._include_imaginary:
-                op_plus = -1 * (op + op_adj)
-                operators.append(op_plus)
+            # the first-order trotterization routine implemented in Qiskit Terra
+            op *= 1j  # type: ignore
+            operators.append(op)
 
         return operators

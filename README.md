@@ -12,10 +12,14 @@ This repository will eventually contain a package that will be able to run the f
 ## Requirements
 The code requires:
 
-1. Qiskit version 1.x.x
-2. Qiskit-nature version 0.x
+1. Qiskit version 0.5.7
+2. Qiskit-nature version 0.7.2
+3. Qiskit-aer version 0.15.2
+4. Qiskit-algorithms version 0.3.1
+5. Qiskit-terra version 0.24.0
+6. Qiskit-ibmq-provider 0.20.2
 3. MRH
-4. PySCF version 2.x
+4. PySCF version 2.12.1
 
 ## Installation
 
