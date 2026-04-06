@@ -67,7 +67,18 @@ class LASUCC(LASQC):
         optimizer = L_BFGS_B(maxfun=10000, iprint=101)
         init_pt = np.zeros(self.ansatz.num_parameters)
 
-        estimator = AerEstimator(approximation=True) # need to update to EstimatorV2 maybe later
+        # We should do additional checking to see that this works for non-GPU-based workloads lol.
+        backend_options = dict(
+            method="statevector",
+            device="GPU",
+            blocking_enable=True,
+            blocking_qubits=30,
+        )
+
+        estimator = AerEstimator(
+            backend_options=backend_options,    
+            approximation=True,
+        ) # need to update to EstimatorV2 maybe later
 
         algorithm = VQE(
             ansatz=self.ansatz,
