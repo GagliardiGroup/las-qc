@@ -7,6 +7,8 @@ import numpy as np
 
 # mrh imports
 from mrh.my_pyscf.mcscf.lasscf_o0 import LASSCF
+from postlas.get_geom import get_geom
+from postlas.get_hamiltonian import get_hamiltonian
 
 # PySCF imports
 from pyscf import gto, mcscf, scf
@@ -19,9 +21,6 @@ from qiskit_aer import AerSimulator
 # Qiskit imports
 #from qiskit.utils import QuantumInstance
 from qiskit_algorithms import NumPyEigensolver
-
-from postlas.get_geom import get_geom
-from postlas.get_hamiltonian import get_hamiltonian
 
 
 def test_hf():

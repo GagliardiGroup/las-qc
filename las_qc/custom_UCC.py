@@ -18,19 +18,18 @@ from __future__ import annotations
 import logging
 from functools import partial
 from itertools import chain
-from typing import Callable, Sequence, Dict, Any
+from typing import Any, Callable, Dict, Sequence
 
+from feg import generate_fermionic_excitations
 from fermionic_excitation_generator import generate_fermionic_excitations
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import EvolvedOperatorAnsatz
-
 from qiskit_nature import QiskitNatureError
 from qiskit_nature.second_q.mappers import QubitMapper, TaperedQubitMapper
 from qiskit_nature.second_q.operators import FermionicOp, SparseLabelOp
+
 # SV add uscc_excitations
 from .utils.fermionic_excitation_generator import generate_fermionic_excitations
-
-from feg import generate_fermionic_excitations
 
 logger = logging.getLogger(__name__)
 
