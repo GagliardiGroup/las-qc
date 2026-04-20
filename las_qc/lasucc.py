@@ -93,7 +93,7 @@ class LASUCC(LASQC):
             estimator = EstimatorV2.from_backend(backend=backend)
         else:
             # Some oddness with the AerEstimatorV2
-            if hasattr(estimator, 'backend'):
+            if hasattr(estimator, "backend"):
                 backend = estimator.backend()
             elif hasattr(estimator, "_backend"):
                 backend = estimator._backend
