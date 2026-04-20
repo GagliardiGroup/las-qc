@@ -119,6 +119,7 @@ class LASUCC(LASQC):
             initial_point=init_pt,
         )
 
+        log.info("Running VQE...")
         result = algorithm.compute_minimum_eigenvalue(self.mapped_ham)
 
         self.e_tot = result.eigenvalue.real + self.las.h1e_for_cas()[1]
