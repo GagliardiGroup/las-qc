@@ -28,16 +28,18 @@ def get_soci_vec(ci_vec, nso, nelec):
             lookup_b[f"{ii:0{norbs}b}"] = cnt
             cnt += 1
 
-        soci_vec = np.zeros(2**nso)
-        for kk in range(2**nso):
-            if (
-                f"{kk:0{nso}b}"[norbs:].count("1") == nelec[0]
-                and f"{kk:0{nso}b}"[:norbs].count("1") == nelec[1]
-            ):
-                soci_vec[kk] = ci_vec[
-                    lookup_a[f"{kk:0{nso}b}"[norbs:]],
-                    lookup_b[f"{kk:0{nso}b}"[:norbs]],
-                ]
+    soci_vec = np.zeros(2**nso)
+    for kk in range(2**nso):
+        if (
+            f"{kk:0{nso}b}"[norbs:].count("1") == nelec[0]
+            and f"{kk:0{nso}b}"[:norbs].count("1") == nelec[1]
+        ):
+            soci_vec[kk] = ci_vec[
+                lookup_a[f"{kk:0{nso}b}"[norbs:]],
+                lookup_b[f"{kk:0{nso}b}"[:norbs]],
+            ]
+
+    return soci_vec
 
 
 def direct_initialization(las):

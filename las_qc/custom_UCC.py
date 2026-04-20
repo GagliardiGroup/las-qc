@@ -150,7 +150,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
         num_sub: list | None = None,
         lasucc_wfn=None,
         las=None,
-        epsilon=0.0 # Add verbose
+        epsilon=0.0,  # Add verbose
     ) -> None:
         # pylint: disable=unused-argument
         """
@@ -212,8 +212,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
         self._num_sub = num_sub
         self._ucc = lasucc_wfn
         self._las = las
-        self._epsilon = epsilon # Add verbose
-
+        self._epsilon = epsilon  # Add verbose
 
         super().__init__(reps=reps, initial_state=initial_state)
 
@@ -488,8 +487,8 @@ class custom_UCC(EvolvedOperatorAnsatz):
         if isinstance(self.excitations, str):
             if self.excitations == "selected":
                 uscc_kwargs = {
-                        "las": self._las,
-                        "epsilon": self._epsilon #add verbose
+                    "las": self._las,
+                    "epsilon": self._epsilon,  # add verbose
                 }
                 generators = [partial(generate_uscc_excitations, **uscc_kwargs)]
             else:
@@ -561,15 +560,8 @@ class custom_UCC(EvolvedOperatorAnsatz):
                         excitation=excitation,
                     )
                 )
-#SV this part is commented to match mrh amplitudes
-            #if any(i in excitation[0] for i in excitation[1]) or any(
-                #len(set(indices)) != len(indices) for indices in excitation
-            #):
-                #raise QiskitNatureError(
-                    #error_message.format(error="Duplicated indices", excitation=excitation)
-                #)
 
-    # SV this part is commented in Abhishek's file
+    # SV this part is commented to match mrh amplitudes
     # if any(i in excitation[0] for i in excitation[1]) or any(
     # len(set(indices)) != len(indices) for indices in excitation
     # ):
