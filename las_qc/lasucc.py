@@ -82,7 +82,7 @@ class LASUCC(LASQC):
         if ansatz is None:
             ansatz = self.generate_ansatz(self.init_state)  # add verbose
 
-        # Check that we were given an estimator
+        # Setup the estimator
         if estimator is None:
             # If no backend is proved, run with QiskitAer
             if backend is None:
@@ -92,7 +92,13 @@ class LASUCC(LASQC):
             # Should the user provide this as well?
             estimator = EstimatorV2.from_backend(backend=backend)
         else:
-            backend = estimator.backend()
+            # Some oddness with the AerEstimatorV2
+            if hasattr(estimator, 'backend'):
+                backend = estimator.backend()
+            elif hasattr(estimator, "_backend"):
+                backend = estimator._backend
+            elif backend is None:
+                log.error("Unable to retrieve the backend. Could not transpile")
 
         # Generate a pass manager to compile our circuits
         if pass_manager is None:
