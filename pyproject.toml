@@ -11,7 +11,7 @@ keywords = ["ab initio", "chemistry", "quantum computing"]
 license = { text = "Apache-2.0" }
 dependencies = [
     # "mhr", # Make this versioned
-    "qiskit >= 1.4, < 2", # We'll move to 2 eventually
+    "qiskit", # We'll move to 2 eventually
     "qiskit-nature", # Let this be determined by the version of qiskit
     "numpy >= 1.21",
 ]
