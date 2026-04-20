@@ -37,13 +37,14 @@ def custom_excitations(
 
     return excitations
 
+
 def generate_uscc_excitations(
     num_spatial_orbitals: int,
     num_particles: Tuple[int, int],
     num_sub: List[int],
     las=None,
     epsilon=0.0,
-    verbose=1
+    verbose=1,
 ):
     """
     Generate selected LAS-UCC excitations using gradient screening.
@@ -71,8 +72,8 @@ def generate_uscc_excitations(
     """
     excitations = []
     all_g, g_sel, a_idxs_new, i_idxs_new = grad.get_grad_exact(las, epsilon=epsilon)
-    np.save('all_g.npy', all_g)
-    np.save('g_sel.npy', g_sel)
+    np.save("all_g.npy", all_g)
+    np.save("g_sel.npy", g_sel)
 
     print("All gradients from exact method = ", all_g)
 
