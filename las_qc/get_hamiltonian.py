@@ -1,6 +1,6 @@
 # Qiskit imports
 from qiskit_nature.second_q.hamiltonians import ElectronicEnergy
-
+from qiskit_nature.second_q.mappers import JordanWignerMapper
 
 def get_hamiltonian(frag, nelecas_sub, ncas_sub, h1, h2, mapper=JordanWignerMapper()):
     """Give an option to what if frag is None"""
