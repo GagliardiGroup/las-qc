@@ -3,10 +3,16 @@
 # PySCF-way standalone wrapper for LAS-VQE
 #########################
 
+import logging
+
 import numpy as np
 from mrh.exploratory.citools import grad
 from mrh.exploratory.unitary_cc import lasuccsd
-from qiskit_aer.primitives import Estimator as AerEstimator
+from qiskit.providers import BackendV2
+from qiskit.transpiler.passmanager import PassManager
+from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from qiskit_aer import AerSimulator
+from qiskit_aer.primitives import EstimatorV2
 from qiskit_algorithms.minimum_eigensolvers import VQE
 from qiskit_algorithms.optimizers import L_BFGS_B
 from qiskit_nature.second_q.mappers import JordanWignerMapper
@@ -15,9 +21,11 @@ from las_qc.custom_UCC import custom_UCC
 
 from .lasqc import LASQC
 
+# Add a logger
+log = logging.getLogger(__name__)
+
 
 class LASUCC(LASQC):
-
     def __init__(self, mol, *, epsilon=0.0, **kwargs):
         super().__init__(mol, **kwargs)
 
@@ -28,8 +36,8 @@ class LASUCC(LASQC):
         self.epsilon = epsilon
 
     def _custom_excitations(self, num_spin_orbitals, num_particles, num_sub, eps=0.0):
-        '''Give an option for full list or selected list of excitations for USCC; must be moved to custom_UCC file---  !!! this needs to be defined outside due to a circular import'''
-        if eps==0.0:
+        """Give an option for full list or selected list of excitations for USCC; must be moved to custom_UCC file---  !!! this needs to be defined outside due to a circular import"""
+        if eps == 0.0:
             excitations = []
             norb = int(num_spin_orbitals / 2)
             uop = lasuccsd.gen_uccsd_op(norb, num_sub)
@@ -39,10 +47,11 @@ class LASUCC(LASQC):
                 excitations.append((tuple(i), tuple(a[::-1])))
 
         else:
-            a_sel, i_sel = grad.get_grad_select(self.las, eps=0.0) # Add the USCC part here
+            a_sel, i_sel = grad.get_grad_select(
+                self.las, eps=0.0
+            )  # Add the USCC part here
 
         return excitations
-
 
     def generate_ansatz(self, init_state):
         ansatz = custom_UCC(
@@ -57,42 +66,56 @@ class LASUCC(LASQC):
         )
         return ansatz
 
-    def run(self, statevectors=None, anstaz=None, estimator=None, optimizer=None):
+    def run(
+        self,
+        estimator: EstimatorV2 | None = None,
+        statevectors=None,
+        ansatz=None,
+        optimizer=None,
+        backend: BackendV2 | None = None,
+        pass_manager: PassManager | None = None,
+    ):
         super().run()
 
-        print("[LASUCC] Running LAS-UCC with VQE...")
-        
-        self.ansatz = self.generate_ansatz(self.init_state) # add verbose
+        log.info("[LASUCC] Running LAS-UCC with VQE...")
 
-        optimizer = L_BFGS_B(maxfun=10000, iprint=101)
-        init_pt = np.zeros(self.ansatz.num_parameters)
+        if ansatz is None:
+            ansatz = self.generate_ansatz(self.init_state)  # add verbose
 
-        # We should do additional checking to see that this works for non-GPU-based workloads lol.
-        backend_options = dict(
-            method="statevector",
-            device="GPU",
-            blocking_enable=True,
-            blocking_qubits=30,
-        )
+        # Check that we were given an estimator
+        if estimator is None:
+            # If no backend is proved, run with QiskitAer
+            if backend is None:
+                log.warn("No backend provided. Simulating with QiskitAer")
+                backend = AerSimulator()
 
-        estimator = AerEstimator(
-            backend_options=backend_options,    
-            approximation=True,
-        ) # need to update to EstimatorV2 maybe later
+            # Should the user provide this as well?
+            estimator = EstimatorV2.from_backend(backend=backend)
+        else:
+            backend = estimator.backend()
 
+        # Generate a pass manager to compile our circuits
+        if pass_manager is None:
+            log.warn("No pass manager provided. Creating default pass manager")
+            pass_manager = generate_preset_pass_manager(backend=backend)
+        ansatz_isa = pass_manager.run(ansatz)
+
+        # Initialize the optimizer
+        if optimizer is None:
+            optimizer = L_BFGS_B(maxfun=10000, iprint=101)
+        init_pt = np.zeros(ansatz.num_parameters)
+
+        # Run VQE
         algorithm = VQE(
-            ansatz=self.ansatz,
+            ansatz=ansatz_isa,
             optimizer=optimizer,
             estimator=estimator,
-            initial_point=init_pt
+            initial_point=init_pt,
         )
-        
+
         result = algorithm.compute_minimum_eigenvalue(self.mapped_ham)
 
         self.e_tot = result.eigenvalue.real + self.las.h1e_for_cas()[1]
-        print("[LASUCC] Final LAS-UCC energy:", self.e_tot)
-        
-        print ("VQE result:")
-        print (result)
-        return self.e_tot
+        log.info("[LASUCC] Final LAS-UCC energy:", self.e_tot)
 
+        return self.e_tot, result
