@@ -3,6 +3,7 @@
 # PySCF-way standalone wrapper for LAS-VQE
 #########################
 
+from typing import Callable
 import logging
 
 import numpy as np
@@ -18,6 +19,7 @@ from qiskit_algorithms.optimizers import L_BFGS_B
 from qiskit_nature.second_q.mappers import JordanWignerMapper
 
 from las_qc.custom_UCC import custom_UCC
+from pathlib import Path
 
 from .lasqc import LASQC
 
@@ -74,6 +76,8 @@ class LASUCC(LASQC):
         optimizer=None,
         backend: BackendV2 | None = None,
         pass_manager: PassManager | None = None,
+        checkpoint_file: str | None = None,
+        callback: Callable | None = None,
     ):
         super().run()
 
@@ -111,12 +115,34 @@ class LASUCC(LASQC):
         # Initialize the optimizer
         if optimizer is None:
             optimizer = L_BFGS_B(maxfun=10000, iprint=101)
+
+        if checkpoint_file:
+            print(f"Parameters will be saved to `{checkpoint_file}`")
+
+
+        if checkpoint_file:
+            try:
+                init_pt = np.load(checkpoint_file)["params"]
+            except FileNotFoundError:
+                init_pt = np.zeros(ansatz.num_parameters)
+        else:
+            init_pt = np.zeros(ansatz.num_parameters)
+
         init_pt = np.zeros(ansatz.num_parameters)
 
         # Configure the callback
-        def callback(*args, **kwargs):
-            print(args)
-            print(kwargs)
+        def callback(step: int, params, est_val, meta: dict):
+            print(f"Step {step}: {est_val}")
+            if checkpoint_file is None:
+                print(f"  Parameters: {params}")
+            else:
+                np.savez(
+                    checkpoint_file,
+                    step=step,
+                    est_val=est_val,
+                    params=params,
+                    meta=meta
+                )
 
         # Run VQE
         algorithm = VQE(
