@@ -17,7 +17,6 @@ from functools import partial
 from itertools import chain
 from typing import Callable, Sequence
 
-import qiskit_nature
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import EvolvedOperatorAnsatz
 from qiskit_nature import QiskitNatureError
@@ -36,10 +35,10 @@ from qiskit_nature.second_q.operators import FermionicOp, SparseLabelOp
 
 from las_qc.custom_excitations import generate_uscc_excitations
 
-#from las_qc.feg import generate_fermionic_excitations
+# from las_qc.feg import generate_fermionic_excitations
 from .fermionic_excitation_generator import generate_fermionic_excitations
 
-#from las_qc.lasucc import generate_uscc_excitations
+# from las_qc.lasucc import generate_uscc_excitations
 
 logger = logging.getLogger(__name__)
 
@@ -239,9 +238,9 @@ class custom_UCC(EvolvedOperatorAnsatz):
         super().__init__(reps=reps, initial_state=initial_state)
 
         # To give read access to the actual excitation list that UCC is using.
-        self._excitation_list: list[
-            tuple[tuple[int, ...], tuple[int, ...]]
-        ] | None = None
+        self._excitation_list: list[tuple[tuple[int, ...], tuple[int, ...]]] | None = (
+            None
+        )
 
         # We cache these, because the generation may be quite expensive (depending on the generator)
         # and the user may want quick access to inspect these. Also, it speeds up testing for the
@@ -341,9 +340,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 # by algorithms such as `AdaptVQE`.
                 excitation_ops = self.excitation_ops()
 
-                logger.debug(
-                    "Converting second-quantized into qubit operators..."
-                )
+                logger.debug("Converting second-quantized into qubit operators...")
                 # Convert operators according to saved state in converter from the conversion of the
                 # main operator since these need to be compatible. If Z2 Symmetry tapering was done
                 # it may be that one or more excitation operators do not commute with the symmetry.
@@ -361,9 +358,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 if self._include_imaginary:
                     # duplicate each excitation to account for the real and imaginary parts.
                     self._excitation_list = list(
-                        chain(
-                            *zip(self._excitation_list, self._excitation_list)
-                        )
+                        chain(*zip(self._excitation_list, self._excitation_list))
                     )
 
                 self._filter_operators(operators=operators)
@@ -399,9 +394,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
         # or ahead of building operators to make sure everything needed is present.
         if self.num_spatial_orbitals is None:
             if raise_on_failure:
-                raise ValueError(
-                    "The number of spatial orbitals cannot be 'None'."
-                )
+                raise ValueError("The number of spatial orbitals cannot be 'None'.")
             return False
 
         if self.num_spatial_orbitals <= 0:
@@ -503,7 +496,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 uscc_kwargs = {
                     "las": self._las,
                     "epsilon": self._epsilon,
-                    "verbose": self._verbose
+                    "verbose": self._verbose,
                 }
                 generators = [
                     partial(generate_uscc_excitations, **uscc_kwargs)
@@ -540,7 +533,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
             raise QiskitNatureError(
                 f"Invalid excitation configuration: {self.excitations}"
             )
-        print ("SV generators = ", generators)
+        print("SV generators = ", generators)
         return generators
 
     def _check_excitation_list(self, excitations: Sequence) -> None:
@@ -607,9 +600,7 @@ class custom_UCC(EvolvedOperatorAnsatz):
                 label.append(f"+_{occ}")
             for unocc in exc[1]:
                 label.append(f"-_{unocc}")
-            op = FermionicOp(
-                {" ".join(label): 1}, num_spin_orbitals=num_spin_orbitals
-            )
+            op = FermionicOp({" ".join(label): 1}, num_spin_orbitals=num_spin_orbitals)
             op -= op.adjoint()
             # we need to account for an additional imaginary phase in the exponent accumulated from
             # the first-order trotterization routine implemented in Qiskit Terra
