@@ -108,7 +108,7 @@ class LASUCC(LASQC):
 
         # Generate a pass manager to compile our circuits
         if pass_manager is None:
-            log.warn("No pass manager provided. Creating default pass manager")
+            log.warning("No pass manager provided. Creating default pass manager")
             pass_manager = generate_preset_pass_manager(backend=backend)
         ansatz_isa = pass_manager.run(ansatz)
 
@@ -123,16 +123,19 @@ class LASUCC(LASQC):
         if checkpoint_file:
             try:
                 init_pt = np.load(checkpoint_file)["params"]
+                log.info(f"Using initial point from {checkpoint_file}")
             except FileNotFoundError:
                 init_pt = np.zeros(ansatz.num_parameters)
+                log.info("Initiallizing from all zeros.")
         else:
             init_pt = np.zeros(ansatz.num_parameters)
+            log.info("Initiallizing from all zeros.")
 
-        init_pt = np.zeros(ansatz.num_parameters)
+        print("Initial Point", init_pt)
 
         # Configure the callback
         def callback(step: int, params, est_val, meta: dict):
-            print(f"Step {step}: {est_val}")
+            print(f"Step {step:4d}: {est_val}")
             if checkpoint_file is None:
                 print(f"  Parameters: {params}")
             else:
@@ -158,5 +161,16 @@ class LASUCC(LASQC):
 
         self.e_tot = result.eigenvalue.real + self.las.h1e_for_cas()[1]
         log.info("[LASUCC] Final LAS-UCC energy:", self.e_tot)
+
+        # If we have a checkpoint file, update to the final parameters
+        if checkpoint_file is None:
+            print(f"  Parameters: {params}")
+        else:
+            np.savez(
+                checkpoint_file,
+                step=result.cost_function_evals,
+                est_val=result.optimal_value,
+                params=result.optimal_point,
+            )
 
         return self.e_tot, result
