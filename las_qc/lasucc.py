@@ -79,6 +79,8 @@ class LASUCC(LASQC):
 
         log.info("[LASUCC] Running LAS-UCC with VQE...")
 
+
+
         if ansatz is None:
             ansatz = self.generate_ansatz(self.init_state)  # add verbose
 
@@ -111,12 +113,18 @@ class LASUCC(LASQC):
             optimizer = L_BFGS_B(maxfun=10000, iprint=101)
         init_pt = np.zeros(ansatz.num_parameters)
 
+        # Configure the callback
+        def callback(*args, **kwargs):
+            print(args)
+            print(kwargs)
+
         # Run VQE
         algorithm = VQE(
             ansatz=ansatz_isa,
             optimizer=optimizer,
             estimator=estimator,
             initial_point=init_pt,
+            callback=callback
         )
 
         log.info("Running VQE...")
