@@ -3,8 +3,8 @@
 # PySCF-way standalone wrapper for LAS-VQE
 #########################
 
-from typing import Callable
 import logging
+from typing import Callable
 
 import numpy as np
 from mrh.exploratory.citools import grad
@@ -19,7 +19,6 @@ from qiskit_algorithms.optimizers import L_BFGS_B
 from qiskit_nature.second_q.mappers import JordanWignerMapper
 
 from las_qc.custom_UCC import custom_UCC
-from pathlib import Path
 
 from .lasqc import LASQC
 
@@ -83,8 +82,6 @@ class LASUCC(LASQC):
 
         log.info("[LASUCC] Running LAS-UCC with VQE...")
 
-
-
         if ansatz is None:
             ansatz = self.generate_ansatz(self.init_state)  # add verbose
 
@@ -119,7 +116,6 @@ class LASUCC(LASQC):
         if checkpoint_file:
             print(f"Parameters will be saved to `{checkpoint_file}`")
 
-
         if checkpoint_file:
             try:
                 init_pt = np.load(checkpoint_file)["params"]
@@ -144,7 +140,7 @@ class LASUCC(LASQC):
                     step=step,
                     est_val=est_val,
                     params=params,
-                    meta=meta
+                    meta=meta,
                 )
 
         # Run VQE
@@ -153,7 +149,7 @@ class LASUCC(LASQC):
             optimizer=optimizer,
             estimator=estimator,
             initial_point=init_pt,
-            callback=callback
+            callback=callback,
         )
 
         log.info("Running VQE...")
@@ -164,7 +160,7 @@ class LASUCC(LASQC):
 
         # If we have a checkpoint file, update to the final parameters
         if checkpoint_file is None:
-            print(f"  Parameters: {params}")
+            print(f"  Parameters: {result.optimal_parameters}")
         else:
             np.savez(
                 checkpoint_file,
